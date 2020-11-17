@@ -5,17 +5,21 @@ namespace Disks
 {
     abstract class Storage
     {
-        public string Name { get; set; }
-        public string Model { get; set; }
+        protected string Name { get; set; }
+        protected string Model { get; set; }
         public Storage(string name, string model)
         {
             Name = name; Model = model;
         }
-        public abstract void Memory();
+        protected abstract void Memory();
         //передаём объём копируемых файлов и единицы измерения
-        public abstract void Copy(long value, string name);
-        public abstract void FreeMemory();
+        public abstract bool Copy(string value, string name);
+        protected abstract void FreeMemory();
         public abstract void GetInfo();
+        protected void Line()
+        {
+            WriteLine("============================================\n");
+        }
     }
 
     //заданиие конструктора базового класса, вызываемого при создании экземпляров производного класса
@@ -23,38 +27,68 @@ namespace Disks
     {
         private long speedUSB3_0 = 42949672960;//42 949 672 960 Бит(скорость)
         private long volume = 549755813888;//549 755 813 888 Бит(общий объём)
-        private long freevolume = 549755813888;//(свободный объём)
-        private string buf;//здесь будет храниться свободный память сразу ввиде строки, для более удобного вызова
+        private double freevolume = 549755813888;//(свободный объём)
         public Flash(string name, string model) : base(name, model)
         {
 
         }
 
-        public override void Memory()
+        protected override void Memory()
         {
-            WriteLine("64 Гб");
+            WriteLine("Общий объём информации: 64 Гб");
         }
 
-        public override void Copy(long value, string name)
+        public override bool Copy(string value, string name)
         {
-            //Через Split(' ') разделяем и передаём сюда
-            //здесь всё преобразуем в бит
-            //и занимаем freevolume
+            double number = Convert.ToDouble(value);
+            switch(name)
+            {
+                case "бит":
+                    freevolume -= number;
+                    break;
+                case "б":
+                    number *= 8;
+                    freevolume -= number;
+                    break;
+                case "Кб":
+                    number *= 8; number *= 1024;
+                    freevolume -= number;
+                    break;
+                case "Мб":
+                    number *= 8; number *= 1024; number *= 1024;
+                    freevolume -= number;
+                    break;
+                case "Гб":
+                    number *= 8; number *= 1024; number *= 1024; number *= 1024;
+                    freevolume -= number;
+                    break;
+                default:
+                    return false;
+            }
+            return true;
         }
 
-        public override void FreeMemory()
+        protected override void FreeMemory()
         {
-            //дописать перевод в единицы измерения, инициализация buf
-            WriteLine((volume - freevolume));
+            freevolume /= 8;
+            freevolume /= 1024;
+            freevolume /= 1024;
+            freevolume /= 1024;
+            WriteLine($"Свободное место на диске: {freevolume} Гб");
+            freevolume *= 1024;
+            freevolume *= 1024;
+            freevolume *= 1024;
+            freevolume *= 8;
         }
 
         public override void GetInfo()
         {
-            WriteLine("Название устройства: " + Name);
+            WriteLine("\nНазвание устройства: " + Name);
             WriteLine("Модель устройства: " + Model);
-            WriteLine("Общий объём информации: 64 Гб");
-            WriteLine("Свободное место: "+buf);
+            Memory();
+            FreeMemory();
             WriteLine("Скорость интерфейса: 5 Гб");
+            Line();
         }
     }
     //abstract class DVD:Storage
@@ -195,23 +229,56 @@ namespace Disks
     {
         static void Main(string[] args)
         {
+            Storage flash = new Flash("MyFlash", "A103mb_1");
+            int choice;
             while (true)
             {
+                //возврат в начало
+                beg:
                 WriteLine("Выберите цифру");
-                WriteLine("1.Просмотреть информацию обо всех доступных устройствах");
+                WriteLine("1.Просмотреть информацию о доступных устройствах");
                 WriteLine("2.Скопировать данные на устройства");
                 WriteLine("3.Выход из программы");
-                int choice = Convert.ToInt32(ReadLine());
+                choice = Convert.ToInt32(ReadLine());
                 switch (choice)
                 {
                     case 1:
-                         
+                        while (true)
+                        {
+                            WriteLine("Выберите цифру устройства");
+                            WriteLine("1.Flash-память");
+                            WriteLine("2.Съёмный HDD");
+                            WriteLine("3.DVD-диск");
+                            WriteLine("4.Возврат в меню");
+                            choice = Convert.ToInt32(ReadLine());
+                            switch (choice)
+                            {
+                                case 1:
+                                    flash.GetInfo();
+                                    break;
+                                case 2:
+                                    break;
+                                case 3:
+                                    break;
+                                case 4: goto beg;
+                                default: WriteLine("Извините, такой команды нет"); break;
+                            }
+                        }
                         break;
                     case 2:
+                        while (true)
+                        {
+                            WriteLine("Введите, какой объём информации будете копировать(например 102 Гб, 68 Мб, 10 Кб, 8 бит, 1024 б)");
+                            var data = ReadLine();
+                            string[] mass = data.Split(' ');
+                            if (mass.Length == 2)
+                                if (flash.Copy(mass[0], mass[1])) break; 
+                                    else WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                        }
                         break;
                     case 3:
                         return;
-                    default: WriteLine("Извините, такой команды нет"); Clear();
+                    default: WriteLine("Извините, такой команды нет"); 
                         break;
                 }
             }
