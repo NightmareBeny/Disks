@@ -57,145 +57,164 @@ namespace Disks
             WriteLine("Скорость интерфейса: 5 Гб");
         }
     }
-    abstract class DVD:Storage
-    {
-        protected long speed = 176947200;//176 947 200бит
-        protected long volume;
-        protected long freevolume;
-        protected string buf;//здесь будет храниться свободный память сразу ввиде строки, для более удобного вызова
-        public DVD(string name, string model) : base(name, model)
-        {
+    //abstract class DVD:Storage
+    //{
+    //    protected long speed = 176947200;//176 947 200бит
+    //    protected long volume;
+    //    protected long freevolume;
+    //    protected string buf;//здесь будет храниться свободный память сразу ввиде строки, для более удобного вызова
+    //    public DVD(string name, string model) : base(name, model)
+    //    {
 
-        }
-    }
-    class SingleSidedDVD:DVD
-    {
-        public SingleSidedDVD(string name, string model) : base(name, model)
-        {
-            volume = 40372692582;//40 372 692 582 бит
-            freevolume = 40372692582;
-        }
+    //    }
+    //}
+    //class SingleSidedDVD:DVD
+    //{
+    //    public SingleSidedDVD(string name, string model) : base(name, model)
+    //    {
+    //        volume = 40372692582;//40 372 692 582 бит
+    //        freevolume = 40372692582;
+    //    }
 
-        public override void Memory()
-        {
-            WriteLine("4.7 Гб");
-        }
+    //    public override void Memory()
+    //    {
+    //        WriteLine("4.7 Гб");
+    //    }
 
-        public override void Copy(long value, string name)
-        {
-            //Через Split(' ') разделяем и передаём сюда
-            //здесь всё преобразуем в бит
-            //и занимаем freevolume
-        }
+    //    public override void Copy(long value, string name)
+    //    {
+    //        //Через Split(' ') разделяем и передаём сюда
+    //        //здесь всё преобразуем в бит
+    //        //и занимаем freevolume
+    //    }
 
-        public override void FreeMemory()
-        {
-            //дописать перевод в единицы измерения, инициализация buf
-            WriteLine((volume - freevolume));
-        }
+    //    public override void FreeMemory()
+    //    {
+    //        //дописать перевод в единицы измерения, инициализация buf
+    //        WriteLine((volume - freevolume));
+    //    }
 
-        public override void GetInfo()
-        {
-            WriteLine("Название устройства: " + Name);
-            WriteLine("Модель устройства: " + Model+ " однослойный односторонний");
-            WriteLine("Общий объём информации: 4,7 Гб");
-            WriteLine("Свободное место: " + buf);
-            WriteLine("Скорость чтения/записи: 21,09 Мб/с");
-        }
-    }
-    class TwoWayDVD : DVD
-    {
-        public TwoWayDVD(string name, string model) : base(name, model)
-        {
-            volume = 77309411328;//77 309 411 328 бит
-            freevolume = 77309411328;
-        }
+    //    public override void GetInfo()
+    //    {
+    //        WriteLine("Название устройства: " + Name);
+    //        WriteLine("Модель устройства: " + Model+ " однослойный односторонний");
+    //        WriteLine("Общий объём информации: 4,7 Гб");
+    //        WriteLine("Свободное место: " + buf);
+    //        WriteLine("Скорость чтения/записи: 21,09 Мб/с");
+    //    }
+    //}
+    //class TwoWayDVD : DVD
+    //{
+    //    public TwoWayDVD(string name, string model) : base(name, model)
+    //    {
+    //        volume = 77309411328;//77 309 411 328 бит
+    //        freevolume = 77309411328;
+    //    }
 
-        public override void Memory()
-        {
-            WriteLine("9 Гб");
-        }
+    //    public override void Memory()
+    //    {
+    //        WriteLine("9 Гб");
+    //    }
 
-        public override void Copy(long value, string name)
-        {
-            //Через Split(' ') разделяем и передаём сюда
-            //здесь всё преобразуем в бит
-            //и занимаем freevolume
-        }
+    //    public override void Copy(long value, string name)
+    //    {
+    //        //Через Split(' ') разделяем и передаём сюда
+    //        //здесь всё преобразуем в бит
+    //        //и занимаем freevolume
+    //    }
 
-        public override void FreeMemory()
-        {
-            //дописать перевод в единицы измерения, инициализация buf
-            WriteLine((volume - freevolume));
-        }
+    //    public override void FreeMemory()
+    //    {
+    //        //дописать перевод в единицы измерения, инициализация buf
+    //        WriteLine((volume - freevolume));
+    //    }
 
-        public override void GetInfo()
-        {
-            WriteLine("Название устройства: " + Name);
-            WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
-            WriteLine("Общий объём информации: 9 Гб");
-            WriteLine("Свободное место: " + buf);
-            WriteLine("Скорость чтения/записи: 21,09 Мб/с");
-        }
-    }
-    class HDD:Storage
-    {
-        private long speedUSB2_0 = 4026531840;//4 026 531 840 бит(скорость)
-        private string buf;//здесь будет храниться свободный память сразу ввиде строки, для более удобного вызова
-        private int number = 2;//кол-во разделов
-        public HDD(string name, string model) : base(name, model)
-        {
-            Tom[] mass = new Tom[number];
-            for (int i = 0; i < number; i++)
-                mass[i].Name = $"Tom{i++}";
-        }
-        public override void Memory()
-        {
-            WriteLine("128Гб");
-        }
+    //    public override void GetInfo()
+    //    {
+    //        WriteLine("Название устройства: " + Name);
+    //        WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
+    //        WriteLine("Общий объём информации: 9 Гб");
+    //        WriteLine("Свободное место: " + buf);
+    //        WriteLine("Скорость чтения/записи: 21,09 Мб/с");
+    //    }
+    //}
+    //class HDD:Storage
+    //{
+    //    private long speedUSB2_0 = 4026531840;//4 026 531 840 бит(скорость)
+    //    private string buf;//здесь будет храниться свободный память сразу ввиде строки, для более удобного вызова
+    //    private int number = 2;//кол-во разделов
+    //    public HDD(string name, string model) : base(name, model)
+    //    {
+    //        Tom[] mass = new Tom[number];
+    //        for (int i = 0; i < number; i++)
+    //            mass[i].Name = $"Tom{i++}";
+    //    }
+    //    public override void Memory()
+    //    {
+    //        WriteLine("128Гб");
+    //    }
 
-        public override void Copy(long value, string name)
-        {
-            //Через Split(' ') разделяем и передаём сюда
-            //здесь всё преобразуем в бит
-            //и занимаем freevolume
-        }
+    //    public override void Copy(long value, string name)
+    //    {
+    //        //Через Split(' ') разделяем и передаём сюда
+    //        //здесь всё преобразуем в бит
+    //        //и занимаем freevolume
+    //    }
 
-        public override void FreeMemory()
-        {
-            //дописать перевод в единицы измерения, инициализация buf
-            WriteLine((volume - freevolume));
-        }
+    //    public override void FreeMemory()
+    //    {
+    //        //дописать перевод в единицы измерения, инициализация buf
+    //        WriteLine((volume - freevolume));
+    //    }
 
-        public override void GetInfo()
-        {
-            WriteLine("Название устройства: " + Name);
-            WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
-            WriteLine("Общий объём информации: 9 Гб");
-            WriteLine("Свободное место: " + buf);
-            WriteLine("Скорость чтения/записи: 21,09 Мб/с");
-        }
-    }
-    class Tom
-    {
-        private string name;
-        public string Name { 
-            get
-            {
-                return name;
-            }
-            set
-            {
-                name = value;
-            }
-        }
-    }
+    //    public override void GetInfo()
+    //    {
+    //        WriteLine("Название устройства: " + Name);
+    //        WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
+    //        WriteLine("Общий объём информации: 9 Гб");
+    //        WriteLine("Свободное место: " + buf);
+    //        WriteLine("Скорость чтения/записи: 21,09 Мб/с");
+    //    }
+    //}
+    //class Tom
+    //{
+    //    private string name;
+    //    public string Name { 
+    //        get
+    //        {
+    //            return name;
+    //        }
+    //        set
+    //        {
+    //            name = value;
+    //        }
+    //    }
+    //}
 
     class Program
     {
         static void Main(string[] args)
         {
-            
+            while (true)
+            {
+                WriteLine("Выберите цифру");
+                WriteLine("1.Просмотреть информацию обо всех доступных устройствах");
+                WriteLine("2.Скопировать данные на устройства");
+                WriteLine("3.Выход из программы");
+                int choice = Convert.ToInt32(ReadLine());
+                switch (choice)
+                {
+                    case 1:
+                         
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        return;
+                    default: WriteLine("Извините, такой команды нет"); Clear();
+                        break;
+                }
+            }
         }
     }
 }
