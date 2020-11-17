@@ -1,5 +1,6 @@
 ﻿using System;
 using static System.Console;
+using System.Collections.Generic;
 
 namespace Disks
 {
@@ -13,7 +14,7 @@ namespace Disks
         }
         protected abstract void Memory();
         //передаём объём копируемых файлов и единицы измерения
-        public abstract bool Copy(string value, string name);
+        public abstract void Copy(double value, string name);
         protected abstract void FreeMemory();
         public abstract void GetInfo();
         protected void Line()
@@ -26,7 +27,6 @@ namespace Disks
     class Flash : Storage
     {
         private long speedUSB3_0 = 42949672960;//42 949 672 960 Бит(скорость)
-        private long volume = 549755813888;//549 755 813 888 Бит(общий объём)
         private double freevolume = 549755813888;//(свободный объём)
         public Flash(string name, string model) : base(name, model)
         {
@@ -38,34 +38,35 @@ namespace Disks
             WriteLine("Общий объём информации: 64 Гб");
         }
 
-        public override bool Copy(string value, string name)
+        public override void Copy(double value, string name)
         {
-            double number = Convert.ToDouble(value);
             switch(name)
             {
                 case "бит":
-                    freevolume -= number;
+                    freevolume -= value;
                     break;
                 case "б":
-                    number *= 8;
-                    freevolume -= number;
+                    value *= 8;
+                    freevolume -= value;
                     break;
                 case "Кб":
-                    number *= 8; number *= 1024;
-                    freevolume -= number;
+                    value *= 8; value *= 1024;
+                    freevolume -= value;
                     break;
                 case "Мб":
-                    number *= 8; number *= 1024; number *= 1024;
-                    freevolume -= number;
+                    value *= 8; value *= 1024; value *= 1024;
+                    freevolume -= value;
                     break;
                 case "Гб":
-                    number *= 8; number *= 1024; number *= 1024; number *= 1024;
-                    freevolume -= number;
+                    value *= 8; value *= 1024; value *= 1024; value *= 1024;
+                    freevolume -= value;
                     break;
                 default:
-                    return false;
+                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                    break;
             }
-            return true;
+                WriteLine($"Скопировано удачно!\nВремя: {value / speedUSB3_0} сек");
+                FreeMemory();
         }
 
         protected override void FreeMemory()
@@ -229,7 +230,8 @@ namespace Disks
     {
         static void Main(string[] args)
         {
-            Storage flash = new Flash("MyFlash", "A103mb_1");
+            List<Flash> flashes = new List<Flash>();
+            flashes.Add(new Flash("MyFlash", "A103mb_1"));
             int choice;
             while (true)
             {
@@ -254,7 +256,8 @@ namespace Disks
                             switch (choice)
                             {
                                 case 1:
-                                    flash.GetInfo();
+                                    foreach (Flash flash in flashes)
+                                    { flash.GetInfo(); }
                                     break;
                                 case 2:
                                     break;
@@ -271,9 +274,26 @@ namespace Disks
                             WriteLine("Введите, какой объём информации будете копировать(например 102 Гб, 68 Мб, 10 Кб, 8 бит, 1024 б)");
                             var data = ReadLine();
                             string[] mass = data.Split(' ');
+                            double number = Convert.ToDouble(mass[0]);
                             if (mass.Length == 2)
-                                if (flash.Copy(mass[0], mass[1])) break; 
-                                    else WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                            {
+                                if (number <= 64 && mass[1]=="Гб")
+                                    foreach (Flash flash in flashes)
+                                    {
+                                        flash.Copy(number, mass[1]);
+                                    }
+                                else
+                                {
+                                    for (int i = 0; i < number / 64; i++)
+                                        flashes.Add(new Flash($"MyFlash{i++}", "A103mb_1"));
+                                    foreach (Flash flash in flashes)
+                                    {
+                                        flash.Copy(number-64, mass[1]);
+                                    }
+                                }
+                                break;
+                            }
+                            else WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
                         }
                         break;
                     case 3:
