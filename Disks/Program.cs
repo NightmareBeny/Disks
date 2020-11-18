@@ -26,8 +26,8 @@ namespace Disks
     //заданиие конструктора базового класса, вызываемого при создании экземпляров производного класса
     class Flash : Storage
     {
+        public double Free { get; set; }= 549755813888;//549 755 813 888 бит(объём);
         private long speedUSB3_0 = 42949672960;//42 949 672 960 Бит(скорость)
-        private double freevolume = 549755813888;//(свободный объём)
         public Flash(string name, string model) : base(name, model)
         {
 
@@ -43,27 +43,27 @@ namespace Disks
             switch(name)
             {
                 case "бит":
-                    freevolume -= value;
+                    Free -= value;
                     break;
                 case "б":
                     value *= 8;
-                    freevolume -= value;
+                    Free -= value;
                     break;
                 case "Кб":
                     value *= 8; value *= 1024;
-                    freevolume -= value;
+                    Free -= value;
                     break;
                 case "Мб":
                     value *= 8; value *= 1024; value *= 1024;
-                    freevolume -= value;
+                    Free -= value;
                     break;
                 case "Гб":
                     value *= 8; value *= 1024; value *= 1024; value *= 1024;
-                    freevolume -= value;
+                    Free -= value;
                     break;
                 default:
                     WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
-                    break;
+                    return;
             }
                 WriteLine($"Скопировано удачно!\nВремя: {value / speedUSB3_0} сек");
                 FreeMemory();
@@ -71,15 +71,15 @@ namespace Disks
 
         protected override void FreeMemory()
         {
-            freevolume /= 8;
-            freevolume /= 1024;
-            freevolume /= 1024;
-            freevolume /= 1024;
-            WriteLine($"Свободное место на диске: {freevolume} Гб");
-            freevolume *= 1024;
-            freevolume *= 1024;
-            freevolume *= 1024;
-            freevolume *= 8;
+            Free /= 8;
+            Free /= 1024;
+            Free /= 1024;
+            Free /= 1024;
+            WriteLine($"Свободное место на диске: {Free} Гб");
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 8;
         }
 
         public override void GetInfo()
@@ -92,87 +92,148 @@ namespace Disks
             Line();
         }
     }
-    //abstract class DVD:Storage
-    //{
-    //    protected long speed = 176947200;//176 947 200бит
-    //    protected long volume;
-    //    protected long freevolume;
-    //    protected string buf;//здесь будет храниться свободный память сразу ввиде строки, для более удобного вызова
-    //    public DVD(string name, string model) : base(name, model)
-    //    {
+    abstract class DVD : Storage
+    {
+        public double Free { get; set; }
+        protected long speed = 176947200;//176 947 200бит
+        public DVD(string name, string model) : base(name, model)
+        {
 
-    //    }
-    //}
-    //class SingleSidedDVD:DVD
-    //{
-    //    public SingleSidedDVD(string name, string model) : base(name, model)
-    //    {
-    //        volume = 40372692582;//40 372 692 582 бит
-    //        freevolume = 40372692582;
-    //    }
+        }
+    }
+    class SingleSidedDVD : DVD
+    {
+        public SingleSidedDVD(string name, string model) : base(name, model)
+        {
+           Free = 40372692582;//40 372 692 582
+        }
 
-    //    public override void Memory()
-    //    {
-    //        WriteLine("4.7 Гб");
-    //    }
+        protected override void Memory()
+        {
+            WriteLine("4.7 Гб");
+        }
 
-    //    public override void Copy(long value, string name)
-    //    {
-    //        //Через Split(' ') разделяем и передаём сюда
-    //        //здесь всё преобразуем в бит
-    //        //и занимаем freevolume
-    //    }
+        public override void Copy(double value, string name)
+        {
+            switch (name)
+            {
+                case "бит":
+                    Free -= value;
+                    break;
+                case "б":
+                    value *= 8;
+                    Free -= value;
+                    break;
+                case "Кб":
+                    value *= 8; value *= 1024;
+                    Free -= value;
+                    break;
+                case "Мб":
+                    value *= 8; value *= 1024; value *= 1024;
+                    Free -= value;
+                    break;
+                case "Гб":
+                    value *= 8; value *= 1024; value *= 1024; value *= 1024;
+                    Free -= value;
+                    break;
+                default:
+                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                    return;
+            }
+            WriteLine($"Скопировано удачно!\nВремя: {value / speed} сек");
+            FreeMemory();
+        }
 
-    //    public override void FreeMemory()
-    //    {
-    //        //дописать перевод в единицы измерения, инициализация buf
-    //        WriteLine((volume - freevolume));
-    //    }
+        protected override void FreeMemory()
+        {
+            Free /= 8;
+            Free /= 1024;
+            Free /= 1024;
+            Free /= 1024;
+            WriteLine($"Свободное место на диске: {Free} Гб");
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 8;
+        }
 
-    //    public override void GetInfo()
-    //    {
-    //        WriteLine("Название устройства: " + Name);
-    //        WriteLine("Модель устройства: " + Model+ " однослойный односторонний");
-    //        WriteLine("Общий объём информации: 4,7 Гб");
-    //        WriteLine("Свободное место: " + buf);
-    //        WriteLine("Скорость чтения/записи: 21,09 Мб/с");
-    //    }
-    //}
-    //class TwoWayDVD : DVD
-    //{
-    //    public TwoWayDVD(string name, string model) : base(name, model)
-    //    {
-    //        volume = 77309411328;//77 309 411 328 бит
-    //        freevolume = 77309411328;
-    //    }
+        public override void GetInfo()
+        {
+            WriteLine("Название устройства: " + Name);
+            WriteLine("Модель устройства: " + Model + " однослойный односторонний");
+            Memory();
+            FreeMemory();
+            WriteLine("Скорость чтения/записи: 21,09 Мб/с");
+            Line();
+        }
+    }
+    class TwoWayDVD : DVD
+    {
+        public TwoWayDVD(string name, string model) : base(name, model)
+        {
+            Free = 77309411328;//77 309 411 328 бит
+        }
 
-    //    public override void Memory()
-    //    {
-    //        WriteLine("9 Гб");
-    //    }
+        protected override void Memory()
+        {
+            WriteLine("9 Гб");
+        }
 
-    //    public override void Copy(long value, string name)
-    //    {
-    //        //Через Split(' ') разделяем и передаём сюда
-    //        //здесь всё преобразуем в бит
-    //        //и занимаем freevolume
-    //    }
+        public override void Copy(double value, string name)
+        {
+            switch (name)
+            {
+                case "бит":
+                    Free -= value;
+                    break;
+                case "б":
+                    value *= 8;
+                    Free -= value;
+                    break;
+                case "Кб":
+                    value *= 8; value *= 1024;
+                    Free -= value;
+                    break;
+                case "Мб":
+                    value *= 8; value *= 1024; value *= 1024;
+                    Free -= value;
+                    break;
+                case "Гб":
+                    value *= 8; value *= 1024; value *= 1024; value *= 1024;
+                    Free -= value;
+                    break;
+                default:
+                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                    return;
+            }
+            WriteLine($"Скопировано удачно!\nВремя: {value / speed} сек");
+            FreeMemory();
+        }
 
-    //    public override void FreeMemory()
-    //    {
-    //        //дописать перевод в единицы измерения, инициализация buf
-    //        WriteLine((volume - freevolume));
-    //    }
+        protected override void FreeMemory()
+        {
+            Free /= 8;
+            Free /= 1024;
+            Free /= 1024;
+            Free /= 1024;
+            WriteLine($"Свободное место на диске: {Free} Гб");
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 8;
+        }
 
-    //    public override void GetInfo()
-    //    {
-    //        WriteLine("Название устройства: " + Name);
-    //        WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
-    //        WriteLine("Общий объём информации: 9 Гб");
-    //        WriteLine("Свободное место: " + buf);
-    //        WriteLine("Скорость чтения/записи: 21,09 Мб/с");
-    //    }
-    //}
+        public override void GetInfo()
+        {
+            WriteLine("Название устройства: " + Name);
+            WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
+            WriteLine("Общий объём информации: 9 Гб");
+            Memory();
+            FreeMemory();
+            WriteLine("Скорость чтения/записи: 21,09 Мб/с");
+            Line();
+        }
+    }
     //class HDD:Storage
     //{
     //    private long speedUSB2_0 = 4026531840;//4 026 531 840 бит(скорость)
@@ -231,7 +292,11 @@ namespace Disks
         static void Main(string[] args)
         {
             List<Flash> flashes = new List<Flash>();
-            flashes.Add(new Flash("MyFlash", "A103mb_1"));
+            flashes.Add(new Flash("MyFlash", "A103mb_0"));
+            List<DVD> singlesidesdvds = new List<DVD>();
+            List<DVD> twowaydvds = new List<DVD>();
+            singlesidesdvds.Add(new SingleSidedDVD("MySingleDVD", "419569"));
+            twowaydvds.Add(new TwoWayDVD("MyTwoWayDVD", "48288_8254a"));
             int choice;
             while (true)
             {
@@ -249,8 +314,8 @@ namespace Disks
                         {
                             WriteLine("Выберите цифру устройства");
                             WriteLine("1.Flash-память");
-                            WriteLine("2.Съёмный HDD");
-                            WriteLine("3.DVD-диск");
+                            WriteLine("2.DVD-диск");
+                            WriteLine("3.Съёмный HDD");
                             WriteLine("4.Возврат в меню");
                             choice = Convert.ToInt32(ReadLine());
                             switch (choice)
@@ -260,6 +325,10 @@ namespace Disks
                                     { flash.GetInfo(); }
                                     break;
                                 case 2:
+                                    foreach (SingleSidedDVD dvd in singlesidesdvds)
+                                    { dvd.GetInfo(); }
+                                    foreach (TwoWayDVD dvd in twowaydvds)
+                                    { dvd.GetInfo(); }
                                     break;
                                 case 3:
                                     break;
@@ -277,23 +346,24 @@ namespace Disks
                             double number = Convert.ToDouble(mass[0]);
                             if (mass.Length == 2)
                             {
-                                if (number <= 64 && mass[1]=="Гб")
-                                    foreach (Flash flash in flashes)
-                                    {
-                                        flash.Copy(number, mass[1]);
-                                    }
-                                else
+                                int id = flashes.Count; bool isfree = false;
+                                for (int i = 0; i < flashes.Count; i++)
+                                    if (flashes[i].Free != 0)
+                                    { id = i; isfree = true; break; }
+                                if (!isfree)
                                 {
-                                    for (int i = 0; i < number / 64; i++)
-                                        flashes.Add(new Flash($"MyFlash{i++}", "A103mb_1"));
-                                    foreach (Flash flash in flashes)
+                                    flashes.Add(new Flash($"MyFlash{id}", $"A103mb_{id}"));
+                                    while (number > 64 && mass[1]=="Гб")
                                     {
-                                        flash.Copy(number-64, mass[1]);
+                                        flashes[id].Copy(64, "Гб"); id++; number -= 64;
+                                        flashes.Add(new Flash($"MyFlash{id}", $"A103mb_{id}"));                                        
                                     }
+                                    flashes[id].Copy(number, mass[1]);
                                 }
+                                else flashes[id].Copy(number, mass[1]);
                                 break;
                             }
-                            else WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                            else WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения"); 
                         }
                         break;
                     case 3:
