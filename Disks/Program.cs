@@ -85,16 +85,14 @@ namespace Disks
                     value *= 8; value *= 1024; value *= 1024; value *= 1024;
                     Free -= value;
                     break;
-                default:
-                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
-                    return;
             }
-            Write($"Скопировано удачно!\nВремя: ");
+            Write($"\t\tFlash-память\nСкопировано удачно!\nВремя: ");
             if (value / Speed < 60)
                 WriteLine(value / Speed + " сек");
             else if (value / Speed < 3600) WriteLine(value / Speed / 60 + " мин");
             else WriteLine(value / Speed / 3600 + " часов");
             FreeMemory();
+            Line();
         }
 
         protected override void FreeMemory()
@@ -181,16 +179,14 @@ namespace Disks
                     value *= 8; value *= 1024; value *= 1024; value *= 1024;
                     Free -= value;
                     break;
-                default:
-                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
-                    return;
             }
-            Write($"Скопировано удачно!\nВремя: ");
+            Write($"\tОднослойный односторонний\nСкопировано удачно!\nВремя: ");
             if (value / Speed < 60)
                 WriteLine(value / Speed + " сек");
             else if (value / Speed < 3600) WriteLine(value / Speed / 60 + " мин");
             else WriteLine(value / Speed / 3600 + " часов");
             FreeMemory();
+            Line();
         }
 
         protected override void FreeMemory()
@@ -271,16 +267,14 @@ namespace Disks
                     value *= 8; value *= 1024; value *= 1024; value *= 1024;
                     Free -= value;
                     break;
-                default:
-                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
-                    return;
             }
-            Write($"Скопировано удачно!\nВремя: ");
+            Write($"\tОднослойный двусторонний\nСкопировано удачно!\nВремя: ");
             if (value / Speed < 60)
                 WriteLine(value / Speed + " сек");
             else if (value / Speed < 3600) WriteLine(value / Speed / 60 + " мин");
             else WriteLine(value / Speed / 3600 + " часов");
             FreeMemory();
+            Line();
         }
 
         protected override void FreeMemory()
@@ -409,7 +403,7 @@ namespace Disks
                 WriteLine("Выберите цифру");
                 WriteLine("1.Просмотреть информацию о доступных устройствах");
                 WriteLine("2.Скопировать данные на устройства");
-                WriteLine("3.Выход из программы");
+                WriteLine("3.Выход из программы\n");
                 choice = Convert.ToInt32(ReadLine());
                 switch (choice)
                 {
@@ -422,16 +416,20 @@ namespace Disks
                         {
                             WriteLine("Введите, какой объём информации будете копировать(например 102 Гб, 68 Мб, 10 Кб, 8 бит, 1024 б, 2 байта, 5,841 Гб)");
                             var data = ReadLine();
+                            WriteLine("\n============================================");
                             string[] mass = data.Split(' ');
-                            if (mass[1] != "Гб" && mass[1] != "Мб" && mass[1] != "Кб" && mass[1] != "б" && mass[1] != "байт" && mass[1] != "бит" && mass.Length==2)
+                            if (mass[1] != "Гб" && mass[1] != "Мб" && mass[1] != "Кб" && mass[1] != "б" && mass[1] != "байт" && mass[1] != "бит")
                             {
                                 WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
                             }
                             else
                             {
-                                try
+                                if (mass.Length == 2)
                                 {
-                                    double number = Convert.ToDouble(mass[0]);
+                                    try
+                                    {
+                                        double number = Convert.ToDouble(mass[0]);
+                                        int flash = 1, sDVD = 1, twoDVD = 1, hdd = 1;
                                         Flash a = new Flash("MyFlash", "A103mb_0");
                                         SingleSidedDVD b = new SingleSidedDVD("MySingleDVD", "419569");
                                         for (int i = 0; i < storages.Count; i++)
@@ -441,14 +439,14 @@ namespace Disks
                                                 if (storages[i].Equals(a))
                                                 {
                                                     storages.Insert(i + 1, new Flash($"MyFlash{i}", $"A103mb_0{i}"));
-                                                    a.Name = $"MyFlash{i}"; a.Model = $"A103mb_0{i}";
+                                                    a.Name = $"MyFlash{i}"; a.Model = $"A103mb_0{i}"; flash++;
                                                 }
                                                 else if (storages[i].Equals(b))
                                                 {
                                                     storages.Insert(i + 1, new SingleSidedDVD($"MySingleDVD{i}", $"419569{i}"));
-                                                    b.Name = $"MySingleDVD{i}"; b.Model = $"419569{i}";
+                                                    b.Name = $"MySingleDVD{i}"; b.Model = $"419569{i}"; sDVD++;
                                                 }
-                                                else storages.Insert(i + 1, new TwoWayDVD($"MyTwoWayDVD{i}", $"48288_8254a{i}"));
+                                                else { storages.Insert(i + 1, new TwoWayDVD($"MyTwoWayDVD{i}", $"48288_8254a{i}")); twoDVD++; }
                                                 number -= FromBit(storages[i].Free, mass[1]);
                                                 storages[i].Copy(FromBit(storages[i].Free, "Гб"), "Гб");
                                             }
@@ -458,13 +456,21 @@ namespace Disks
                                                 number = Convert.ToDouble(mass[0]);
                                             }
                                         }
-                                    break;
-                                }
-                                catch (Exception e)
-                                {
-                                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
-                                    WriteLine(e.Message);
-                                }
+                                        WriteLine("\n============================================");
+                                        WriteLine($"Для того чтобы скопировать {data} потребовалось:");
+                                        WriteLine($"{flash} Flash-памяти объёмом 64 Гб");
+                                        WriteLine($"{sDVD} однослойных односторонних DVD-дисков объёмом 4,7 Гб");
+                                        WriteLine($"{twoDVD} однослойных двусторонних DVD-дисков объёмом 9 Гб");
+                                        WriteLine($"{hdd} съёмных HDD объёмом 128 Гб");
+                                        WriteLine("============================================\n");
+                                        break;
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                                        WriteLine(e.Message);
+                                    }
+                                } else WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
                             }
                         }
                         break;
