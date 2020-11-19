@@ -6,8 +6,11 @@ namespace Disks
 {
     abstract class Storage
     {
-        protected string Name { get; set; }
-        protected string Model { get; set; }
+        public string Name { get; set; }
+        public string Model { get; set; }
+        //Пока для пробного варианта
+        public double Free { get; set; }
+        protected double Speed { get; set; }
         public Storage(string name, string model)
         {
             Name = name; Model = model;
@@ -21,23 +24,40 @@ namespace Disks
         {
             WriteLine("============================================\n");
         }
+        public abstract override bool Equals(Object obj);
+
+        public abstract override int GetHashCode();
     }
 
     //заданиие конструктора базового класса, вызываемого при создании экземпляров производного класса
     class Flash : Storage
     {
-        public double Free { get; set; }= 549755813888;//549 755 813 888 бит(объём);
-        private long speedUSB3_0 = 42949672960;//42 949 672 960 Бит(скорость)
         public Flash(string name, string model) : base(name, model)
         {
-
+            Free = 549755813888;//549 755 813 888 бит(объём)
+            Speed = 42949672960;//42 949 672 960 Бит(скорость)
         }
-
+        public override bool Equals(Object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                Flash p = (Flash)obj;
+                return (Name == p.Name) && (Speed == p.Speed) && (Model == p.Model) && (Free==p.Free);
+            }
+        }
+        public override int GetHashCode()
+        {
+            return Tuple.Create(Name, Speed, Model, Free).GetHashCode();
+        }
         protected override void Memory()
         {
             WriteLine("Общий объём: 64 Гб");
         }
-
         public override void Copy(double value, string name)
         {
             switch(name)
@@ -70,10 +90,10 @@ namespace Disks
                     return;
             }
             Write($"Скопировано удачно!\nВремя: ");
-            if (value / speedUSB3_0 < 60)
-                WriteLine(value / speedUSB3_0 + " сек");
-            else if(value / speedUSB3_0 < 3600) WriteLine(value / speedUSB3_0 / 60 + " мин");
-            else WriteLine(value / speedUSB3_0 / 3600 + " часов");
+            if (value / Speed < 60)
+                WriteLine(value / Speed + " сек");
+            else if (value / Speed < 3600) WriteLine(value / Speed / 60 + " мин");
+            else WriteLine(value / Speed / 3600 + " часов");
             FreeMemory();
         }
 
@@ -102,11 +122,9 @@ namespace Disks
     }
     abstract class DVD : Storage
     {
-        public double Free { get; set; }
-        protected long speed = 176947200;//176 947 200бит
         public DVD(string name, string model) : base(name, model)
         {
-
+            Speed= 176947200;//176 947 200 бит
         }
     }
     class SingleSidedDVD : DVD
@@ -115,12 +133,27 @@ namespace Disks
         {
            Free = 40372692582.4;//40 372 692 582.4
         }
-
+        public override bool Equals(Object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                SingleSidedDVD p = (SingleSidedDVD)obj;
+                return (Name == p.Name) && (Speed == p.Speed) && (Model == p.Model) && (Free == p.Free);
+            }
+        }
+        public override int GetHashCode()
+        {
+            return Tuple.Create(Name, Speed, Model, Free).GetHashCode();
+        }
         protected override void Memory()
         {
             WriteLine("Общий объём: 4.7 Гб");
         }
-
         public override void Copy(double value, string name)
         {
             switch (name)
@@ -153,10 +186,10 @@ namespace Disks
                     return;
             }
             Write($"Скопировано удачно!\nВремя: ");
-            if (value / speed < 60)
-                WriteLine(value / speed + " сек");
-            else if (value / speed < 3600) WriteLine(value / speed / 60 + " мин");
-            else WriteLine(value / speed / 3600 + " часов");
+            if (value / Speed < 60)
+                WriteLine(value / Speed + " сек");
+            else if (value / Speed < 3600) WriteLine(value / Speed / 60 + " мин");
+            else WriteLine(value / Speed / 3600 + " часов");
             FreeMemory();
         }
 
@@ -189,7 +222,23 @@ namespace Disks
         {
             Free = 77309411328;//77 309 411 328 бит
         }
-
+        public override bool Equals(Object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                TwoWayDVD p = (TwoWayDVD)obj;
+                return (Name == p.Name) && (Speed == p.Speed) && (Model == p.Model) && (Free == p.Free);
+            }
+        }
+        public override int GetHashCode()
+        {
+            return Tuple.Create(Name, Speed, Model, Free).GetHashCode();
+        }
         protected override void Memory()
         {
             WriteLine("Общий объём: 9 Гб");
@@ -227,10 +276,10 @@ namespace Disks
                     return;
             }
             Write($"Скопировано удачно!\nВремя: ");
-            if (value / speed < 60)
-                WriteLine(value / speed + " сек");
-            else if (value / speed < 3600) WriteLine(value / speed / 60 + " мин");
-            else WriteLine(value / speed / 3600 + " часов");
+            if (value / Speed < 60)
+                WriteLine(value / Speed + " сек");
+            else if (value / Speed < 3600) WriteLine(value / Speed / 60 + " мин");
+            else WriteLine(value / Speed / 3600 + " часов");
             FreeMemory();
         }
 
@@ -350,17 +399,13 @@ namespace Disks
 
         static void Main(string[] args)
         {
-            List<Flash> flashes = new List<Flash>();
-            flashes.Add(new Flash("MyFlash", "A103mb_0"));
-            List<DVD> singlesidesdvds = new List<DVD>();
-            List<DVD> twowaydvds = new List<DVD>();
-            singlesidesdvds.Add(new SingleSidedDVD("MySingleDVD", "419569"));
-            twowaydvds.Add(new TwoWayDVD("MyTwoWayDVD", "48288_8254a"));
+            List<Storage> storages = new List<Storage>();
+            storages.Add(new Flash("MyFlash", "A103mb_0"));
+            storages.Add(new SingleSidedDVD("MySingleDVD", "419569"));
+            storages.Add(new TwoWayDVD("MyTwoWayDVD", "48288_8254a"));
             int choice;
             while (true)
             {
-                //возврат в начало
-                beg:
                 WriteLine("Выберите цифру");
                 WriteLine("1.Просмотреть информацию о доступных устройствах");
                 WriteLine("2.Скопировать данные на устройства");
@@ -369,32 +414,8 @@ namespace Disks
                 switch (choice)
                 {
                     case 1:
-                        while (true)
-                        {
-                            WriteLine("Выберите цифру устройства");
-                            WriteLine("1.Flash-память");
-                            WriteLine("2.DVD-диск");
-                            WriteLine("3.Съёмный HDD");
-                            WriteLine("4.Возврат в меню");
-                            choice = Convert.ToInt32(ReadLine());
-                            switch (choice)
-                            {
-                                case 1:
-                                    foreach (Flash flash in flashes)
-                                    { flash.GetInfo(); }
-                                    break;
-                                case 2:
-                                    foreach (SingleSidedDVD dvd in singlesidesdvds)
-                                    { dvd.GetInfo(); }
-                                    foreach (TwoWayDVD dvd in twowaydvds)
-                                    { dvd.GetInfo(); }
-                                    break;
-                                case 3:
-                                    break;
-                                case 4: goto beg;
-                                default: WriteLine("Извините, такой команды нет"); break;
-                            }
-                        }
+                        foreach (Storage storage in storages)
+                        { storage.GetInfo(); }
                         break;
                     case 2:
                         while (true)
@@ -402,113 +423,48 @@ namespace Disks
                             WriteLine("Введите, какой объём информации будете копировать(например 102 Гб, 68 Мб, 10 Кб, 8 бит, 1024 б, 2 байта, 5,841 Гб)");
                             var data = ReadLine();
                             string[] mass = data.Split(' ');
-                            try
-                            {
-                                double number = Convert.ToDouble(mass[0]);
-                                if (mass.Length == 2)
-                                {
-                                    //для Flash
-                                    int id = flashes.Count; bool isfree = false;
-                                    for (int i = 0; i < flashes.Count; i++)
-                                        if (flashes[i].Free != 0)
-                                        { id = i; isfree = true; break; }
-                                    //все flash заполнены
-                                    if (!isfree)
-                                    {
-                                        flashes.Add(new Flash($"MyFlash{id}", $"A103mb_{id}"));
-                                        while (number > 64 && mass[1] == "Гб")
-                                        {
-                                            flashes[id].Copy(64, "Гб"); id++; number -= 64;
-                                            flashes.Add(new Flash($"MyFlash{id}", $"A103mb_{id}"));
-                                        }
-                                        flashes[id].Copy(number, mass[1]);
-                                    }
-                                    //есть не полностью заполненный flash
-                                    else
-                                    {
-                                        number = ToBit(number, mass[1]);
-                                        if (flashes[id].Free < number)
-                                        {
-                                            while (flashes[id].Free < number)
-                                            {
-                                                number -= flashes[id].Free;
-                                                flashes[id].Copy(FromBit(flashes[id].Free, mass[1]), mass[1]);
-                                                flashes.Add(new Flash($"MyFlash{id++}", $"A103mb_{id}"));
-                                            }
-                                            flashes[id].Copy(FromBit(number, mass[1]), mass[1]);
-                                        }
-                                        else flashes[id].Copy(FromBit(number, mass[1]), mass[1]);
-                                    }
-                                    //для SingleSidedDVD
-                                    number = Convert.ToDouble(mass[0]);
-                                    id = singlesidesdvds.Count; isfree = false;
-                                    for (int i = 0; i < singlesidesdvds.Count; i++)
-                                        if (singlesidesdvds[i].Free != 0)
-                                        { id = i; isfree = true; break; }
-                                    if (!isfree)
-                                    {
-                                        singlesidesdvds.Add(new SingleSidedDVD($"MySingleDVD{id}", $"419569_{id}"));
-                                        while (number > 4.7 && mass[1] == "Гб")
-                                        {
-                                            singlesidesdvds[id].Copy(4.7, "Гб"); id++; number -= 4.7;
-                                            singlesidesdvds.Add(new SingleSidedDVD($"MySingleDVD{id}", $"419569_{id}"));
-                                        }
-                                        singlesidesdvds[id].Copy(number, mass[1]);
-                                    }
-                                    else
-                                    {
-                                        number = ToBit(number, mass[1]);
-                                        if (singlesidesdvds[id].Free < number)
-                                        {
-                                            while (singlesidesdvds[id].Free < number)
-                                            {
-                                                number -= singlesidesdvds[id].Free;
-                                                singlesidesdvds[id].Copy(FromBit(singlesidesdvds[id].Free, mass[1]), mass[1]);
-                                                singlesidesdvds.Add(new SingleSidedDVD($"MySingleDVD{id++}", $"419569_{id}"));
-                                            }
-                                            singlesidesdvds[id].Copy(FromBit(number, mass[1]), mass[1]);
-                                        }
-                                        else singlesidesdvds[id].Copy(FromBit(number, mass[1]), mass[1]);
-                                    }
-                                    //для TwoWayDVD
-                                    number = Convert.ToDouble(mass[0]);
-                                    id = twowaydvds.Count; isfree = false;
-                                    for (int i = 0; i < twowaydvds.Count; i++)
-                                        if (twowaydvds[i].Free != 0)
-                                        { id = i; isfree = true; break; }
-                                    if (!isfree)
-                                    {
-                                        twowaydvds.Add(new TwoWayDVD($"MyTwoWayDVD{id}", $"48288_8254{id}"));
-                                        while (number > 9 && mass[1] == "Гб")
-                                        {
-                                            twowaydvds[id].Copy(9, "Гб"); id++; number -= 9;
-                                            twowaydvds.Add(new TwoWayDVD($"MyTwoWayDVD{id}", $"48288_8254{id}"));
-                                        }
-                                        twowaydvds[id].Copy(number, mass[1]);
-                                    }
-                                    else
-                                    {
-                                        number = ToBit(number, mass[1]);
-                                        if (twowaydvds[id].Free < number)
-                                        {
-                                            while (twowaydvds[id].Free < number)
-                                            {
-                                                number -= twowaydvds[id].Free;
-                                                twowaydvds[id].Copy(FromBit(twowaydvds[id].Free, mass[1]), mass[1]);
-                                                twowaydvds.Add(new TwoWayDVD($"MyTwoWayDVD{id++}", $"48288_8254{id}"));
-                                            }
-                                            twowaydvds[id].Copy(FromBit(number, mass[1]), mass[1]);
-                                        }
-                                        else twowaydvds[id].Copy(FromBit(number, mass[1]), mass[1]);
-                                    }
-                                    break;
-                                }
-                                else WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
-                            }
-                            catch (Exception)
+                            if (mass[1] != "Гб" && mass[1] != "Мб" && mass[1] != "Кб" && mass[1] != "б" && mass[1] != "байт" && mass[1] != "бит" && mass.Length==2)
                             {
                                 WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
-                                goto case 2;
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    double number = Convert.ToDouble(mass[0]);
+                                        Flash a = new Flash("MyFlash", "A103mb_0");
+                                        SingleSidedDVD b = new SingleSidedDVD("MySingleDVD", "419569");
+                                        for (int i = 0; i < storages.Count; i++)
+                                        {
+                                            if (ToBit(number, mass[1]) > storages[i].Free)
+                                            {
+                                                if (storages[i].Equals(a))
+                                                {
+                                                    storages.Insert(i + 1, new Flash($"MyFlash{i}", $"A103mb_0{i}"));
+                                                    a.Name = $"MyFlash{i}"; a.Model = $"A103mb_0{i}";
+                                                }
+                                                else if (storages[i].Equals(b))
+                                                {
+                                                    storages.Insert(i + 1, new SingleSidedDVD($"MySingleDVD{i}", $"419569{i}"));
+                                                    b.Name = $"MySingleDVD{i}"; b.Model = $"419569{i}";
+                                                }
+                                                else storages.Insert(i + 1, new TwoWayDVD($"MyTwoWayDVD{i}", $"48288_8254a{i}"));
+                                                number -= FromBit(storages[i].Free, mass[1]);
+                                                storages[i].Copy(FromBit(storages[i].Free, "Гб"), "Гб");
+                                            }
+                                            else
+                                            {
+                                                storages[i].Copy(number, mass[1]);
+                                                number = Convert.ToDouble(mass[0]);
+                                            }
+                                        }
+                                    break;
+                                }
+                                catch (Exception e)
+                                {
+                                    WriteLine("Извините, неверно указан тип данных\nОбратите внимание на пример ввода единиц измерения");
+                                    WriteLine(e.Message);
+                                }
                             }
                         }
                         break;
