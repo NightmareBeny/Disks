@@ -114,7 +114,7 @@ namespace Disks
             WriteLine("Модель устройства: " + Model);
             Memory();
             FreeMemory();
-            WriteLine("Скорость интерфейса: 5 Гб");
+            WriteLine("Скорость интерфейса: 5 Гб/сек");
             Line();
         }
     }
@@ -208,7 +208,7 @@ namespace Disks
             WriteLine("Модель устройства: " + Model + " однослойный односторонний");
             Memory();
             FreeMemory();
-            WriteLine("Скорость чтения/записи: 21,09 Мб/с");
+            WriteLine("Скорость чтения/записи: 21,09 Мб/сек");
             Line();
         }
     }
@@ -296,62 +296,118 @@ namespace Disks
             WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
             Memory();
             FreeMemory();
-            WriteLine("Скорость чтения/записи: 21,09 Мб/с");
+            WriteLine("Скорость чтения/записи: 21,09 Мб/сек");
             Line();
         }
     }
-    //class HDD:Storage
-    //{
-    //    private long speedUSB2_0 = 4026531840;//4 026 531 840 бит(скорость)
-    //    private string buf;//здесь будет храниться свободный память сразу ввиде строки, для более удобного вызова
-    //    private int number = 2;//кол-во разделов
-    //    public HDD(string name, string model) : base(name, model)
-    //    {
-    //        Tom[] mass = new Tom[number];
-    //        for (int i = 0; i < number; i++)
-    //            mass[i].Name = $"Tom{i++}";
-    //    }
-    //    public override void Memory()
-    //    {
-    //        WriteLine("128Гб");
-    //    }
+    class HDD : Storage
+    {
+        private int number = 2;//кол-во разделов
+        public HDD(string name, string model) : base(name, model)
+        {
+            Speed= 4026531840;//4 026 531 840 бит(скорость)
+            Tom[] mass = new Tom[number];
+            for (int i = 0; i < number; i++)
+            {
+                mass[i] = new Tom();
+                Free += mass[i].Space;
+            }
+        }
+        public override bool Equals(Object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                HDD p = (HDD)obj;
+                return (Name == p.Name) && (Speed == p.Speed) && (Model == p.Model) && (Free == p.Free);
+            }
+        }
+        public override int GetHashCode()
+        {
+            return Tuple.Create(Name, Speed, Model, Free).GetHashCode();
+        }
+        protected override void Memory()
+        {
+            WriteLine("Общий объём: 128 Гб");
+        }
 
-    //    public override void Copy(long value, string name)
-    //    {
-    //        //Через Split(' ') разделяем и передаём сюда
-    //        //здесь всё преобразуем в бит
-    //        //и занимаем freevolume
-    //    }
+        public override void Copy(double value, string name)
+        {
+            switch (name)
+            {
+                case "бит":
+                    Free -= value;
+                    break;
+                case "б":
+                    value *= 8;
+                    Free -= value;
+                    break;
+                case "байт":
+                    value *= 8;
+                    Free -= value;
+                    break;
+                case "Кб":
+                    value *= 8; value *= 1024;
+                    Free -= value;
+                    break;
+                case "Мб":
+                    value *= 8; value *= 1024; value *= 1024;
+                    Free -= value;
+                    break;
+                case "Гб":
+                    value *= 8; value *= 1024; value *= 1024; value *= 1024;
+                    Free -= value;
+                    break;
+            }
+            Write($"\t\tСъёмный HDD\nСкопировано удачно!\nВремя: ");
+            if (value / Speed < 60)
+                WriteLine(value / Speed + " сек");
+            else if (value / Speed < 3600) WriteLine(value / Speed / 60 + " мин");
+            else WriteLine(value / Speed / 3600 + " часов");
+            FreeMemory();
+            Line();
+        }
 
-    //    public override void FreeMemory()
-    //    {
-    //        //дописать перевод в единицы измерения, инициализация buf
-    //        WriteLine((volume - freevolume));
-    //    }
+        protected override void FreeMemory()
+        {
+            Free /= 8;
+            Free /= 1024;
+            Free /= 1024;
+            Free /= 1024;
+            WriteLine($"Свободное место на диске: {Free} Гб");
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 1024;
+            Free *= 8;
+        }
 
-    //    public override void GetInfo()
-    //    {
-    //        WriteLine("Название устройства: " + Name);
-    //        WriteLine("Модель устройства: " + Model + " однослойный двусторонний");
-    //        WriteLine("Общий объём информации: 9 Гб");
-    //        WriteLine("Свободное место: " + buf);
-    //        WriteLine("Скорость чтения/записи: 21,09 Мб/с");
-    //    }
-    //}
-    //class Tom
-    //{
-    //    private string name;
-    //    public string Name { 
-    //        get
-    //        {
-    //            return name;
-    //        }
-    //        set
-    //        {
-    //            name = value;
-    //        }
-    //    }
-    //}
+        public override void GetInfo()
+        {
+            WriteLine("Название устройства: " + Name);
+            WriteLine("Модель устройства: " + Model);
+            WriteLine($"Кол-во томов: {number}");
+            Tom[] mass = new Tom[number];
+            for (int i = 0; i < number; i++)
+            {
+                mass[i] = new Tom();
+                WriteLine($"Название {i + 1} тома: {mass[i].Name}"+(i+1));
+                WriteLine($"Размер {i + 1} тома: 64 Гб");
+            }
+            Memory();
+            FreeMemory();
+            WriteLine("Скорость интерфейса: 480 Мб/сек");
+            Line();
+        }
+    }
+    class Tom
+    {
+        public string Name { get; } = "Tom";
+        public double Space { get; } = 549755813888;//549 755 813 888 бит
+    }
 
     class Program
     {
@@ -397,6 +453,7 @@ namespace Disks
             storages.Add(new Flash("MyFlash", "A103mb_0"));
             storages.Add(new SingleSidedDVD("MySingleDVD", "419569"));
             storages.Add(new TwoWayDVD("MyTwoWayDVD", "48288_8254a"));
+            storages.Add(new HDD("MyHDD", "172522"));
             int choice;
             while (true)
             {
@@ -432,6 +489,7 @@ namespace Disks
                                         int flash = 1, sDVD = 1, twoDVD = 1, hdd = 1;
                                         Flash a = new Flash("MyFlash", "A103mb_0");
                                         SingleSidedDVD b = new SingleSidedDVD("MySingleDVD", "419569");
+                                        TwoWayDVD c = new TwoWayDVD("MyTwoWayDVD", "48288_8254a");
                                         for (int i = 0; i < storages.Count; i++)
                                         {
                                             if (ToBit(number, mass[1]) > storages[i].Free)
@@ -446,7 +504,17 @@ namespace Disks
                                                     storages.Insert(i + 1, new SingleSidedDVD($"MySingleDVD{i}", $"419569{i}"));
                                                     b.Name = $"MySingleDVD{i}"; b.Model = $"419569{i}"; sDVD++;
                                                 }
-                                                else { storages.Insert(i + 1, new TwoWayDVD($"MyTwoWayDVD{i}", $"48288_8254a{i}")); twoDVD++; }
+                                                else if(storages[i].Equals(c))
+                                                { storages.Insert(i + 1, new TwoWayDVD($"MyTwoWayDVD{i}", $"48288_8254a{i}"));
+                                                    c.Name = $"MyTwoWayDVD{i}"; c.Model = $"48288_8254a{i}";
+                                                    twoDVD++; }
+                                                else
+                                                {
+                                                    storages.Insert(i + 1, new HDD($"MyHDD{i}", $"172522{i}"));
+                                                    c.Name = $"MyHDD{i}"; c.Model = $"172522{i}";
+                                                    hdd++;
+                                                }
+
                                                 number -= FromBit(storages[i].Free, mass[1]);
                                                 storages[i].Copy(FromBit(storages[i].Free, "Гб"), "Гб");
                                             }
